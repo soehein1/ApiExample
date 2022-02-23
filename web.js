@@ -1,7 +1,23 @@
-const express = require("express")
+const express = require('express')
+require('dotenv').config()
+const productsRoute = require('./routes/productsRoute')
+const odersRoute = require('./routes/ordersRoute')
+const userRoute = require('./routes/usersRoute')
+const connectDB = require('./dbconfig/dbconnection')
 
-app = express()
-app.get('/',(req,res)=>{
-    res.send('Hello Bro')
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }))
+connectDB()
+app.get('/', (req, res) => {
+    res.send("Hey Hello");
+});
+
+
+app.use('/api', productsRoute);
+app.use('/api', odersRoute);
+app.use('/api', userRoute);
+app.listen(process.env.PORT, () => {
+    console.log('runnnning')
 })
-app.listen(process.env.PORT,()=>console.log("running"))
