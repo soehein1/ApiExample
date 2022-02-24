@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "this is api project",
   "main": "web.js",
+  
   "scripts": {
-    "start": "node web.js"
+    "start": "node web.js",
+    "dev":"nodemon web.js"
   },
   "author": "shl",
   "license": "ISC",
