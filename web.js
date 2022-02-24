@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
 connectDB()
 app.get('/', (req, res) => {
-    res.send("Hey Hello");
+    res.send("Hey Hello"+req);
 });
 
 
