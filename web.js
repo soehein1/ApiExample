@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: false }))
 connectDB()
 app.get('/', (req, res) => {
     console.log('why am i not able to connect to db')
-    res.send("Hey Hello"+req);
+    res.send("Hey Hellokkkkkk");
 });
 
 
