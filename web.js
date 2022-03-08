@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
 
 
 app.use('/api', productsRoute);
-app.use('/api', odersRoute);
-app.use('/api', userRoute);
+app.use('/api/oders', odersRoute);
+app.use('/api/user', userRoute);
 app.listen(process.env.PORT, () => {
     console.log('runnnning')
 })

@@ -1,6 +1,10 @@
 const User = require("../models/userModel")
 const bcrypt = require("bcrypt")
-const isPasswordValid = require('../validators/passwordValidator')
+const jwt = require('jsonwebtoken')
+const senEmail = require('../emails/emailConfirmation')
+const Token = require('../models/tokenModel')
+require('dotenv').config()
+
 
 async function hashPassword(password) {
     const salt = await bcrypt.genSalt(11);
@@ -8,49 +12,124 @@ async function hashPassword(password) {
     return hash;
 }
 
-const getUser = (req, res) => {
-    console.log('single user information');
-    res.send('This is Single USER')
+const getUser = async (req, res) => {
+    var user = {}
+    jwt.verify(req.token, process.env.TOKEN_KEY, (err, authData) => {
+        if (err) {
+            res.status(403).json({ message: "forbidden" })
+        }
+        else {
+            user = authData
+        }
+
+    })
+    user = await User.findOne({ email: user.email })
+    if (user) {
+        res.json(user)
+    }
 }
-const postUser = async (req, res) => {
+const signUp = async (req, res) => {
 
     // extract user information from request's body//
+    const { fullName, email, password, phone } = req.body
 
-    const { fullName, email, paswd1, paswd2 } = req.body
-
-    //test if any required field is missing//
-
-    if (!fullName || !email || !paswd1 || !paswd2) {
-        res.json({ message: 'information missing' })
-    } else if (paswd1 != paswd2) {
-        res.json({ message: 'passwords did not match' })
-    } else if (!isPasswordValid(paswd1)) {
-        res.json({ message: 'password invalid' })
+    const hashedPassword = await hashPassword(password)
+    const user = new User({
+        fullName,
+        phone,
+        email,
+        password: hashedPassword
+    });
+    const isUserExists = await User.findOne({ email: user.email })
+    if (isUserExists) {
+        res.json({ message: 'User Already Exists' })
     } else {
-
-        const hashedPassword = await hashPassword(paswd1)
-        const user = new User({
-            fullName,
-            email,
-            paswd: hashedPassword
-        });
-        const isUserExists = await User.findOne({ email: user.email })
-        if (isUserExists) {
-            res.json({ message: 'User Already Exists' })
-        } else {
-            const data = await user.save()
-            res.json(data)
-
+        const data = await user.save()
+        const token = new Token({
+            user: data._id,
+            token: await bcrypt.genSalt(8)
+        })
+        const savedToken = await token.save()
+        if (savedToken.token) {
+            console.log(savedToken.token)
         }
+        //await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name })
+        res.json(data)
 
     }
 
+
+
 }
+
+
+
+
 const updateUser = (req, res) => {
     res.send('user updated')
 }
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!(email && password)) {
+            res.status(400).send('All input is required');
+        }
+        const user = await User.findOne({ email });
+        if (user && (await bcrypt.compare(password, user.password))) {
+            const token = jwt.sign(
+                {
+                    sub: user._id, email: user.email, status: user.status
+
+                },
+                process.env.TOKEN_KEY,
+                {
+                    expiresIn: "3h",
+                }
+            );
+            res.status(201).json({ token })
+        } else {
+            res.status(400).json({ message: "enter correct email and password" })
+        }
+    } catch (err) {
+        console.log(err)
+
+    }
+}
+
+const confirmEmail = async (req, res) => {
+    console.log(req.hostname + "        " + req.url)
+    //console.log(req.query.token)
+    const tokenId = req.query.token
+    if (tokenId) {
+        Token.findOne({ token: tokenId }, (err, token) => {
+            //console.log(token)
+            if (err || !token) {
+                res.status(404).json({ message: "No such thing exists :-)" })
+            } else {
+                User.findOneAndUpdate({ _id: token.user, status: "pending" }, { status: "verified" }, async (error, user) => {
+                    if (error || !user) {
+                        res.status(400).json({ message: "its too late bro" })
+                    } else {
+                        await Token.findOneAndDelete({ token: tokenId })
+
+                        res.status(201).json({ message: "verified successfully" })
+                    }
+
+                })
+            }
+
+        })
+
+
+    } else {
+        res.status(400).json({ message: "bad boy" })
+
+    }
+}
 module.exports = {
     getUser,
-    postUser,
-    updateUser
+    signUp,
+    updateUser,
+    loginUser,
+    confirmEmail
 }
