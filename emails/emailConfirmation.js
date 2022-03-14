@@ -19,7 +19,7 @@ const sendEmail =async (from, to,url) => {
     //sendTemplateEmail.templateId = 1
 
     apiInstance.sendTransacEmail(sendSmtpEmail).then((data) => {
-        console.log(JSON.stringify(data))
+        console.log("Email sent successfully")
     }, (error) => {
         console.log(error)
     })

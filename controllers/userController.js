@@ -31,7 +31,7 @@ const getUser = async (req, res) => {
 const signUp = async (req, res) => {
 
     // extract user information from request's body//
-    const { full_name, email, password, phone, role,address } = req.body
+    const { full_name, email, password, phone, role, address } = req.body
 
     const hashedPassword = await hashPassword(password)
     const user = new User({
@@ -53,10 +53,11 @@ const signUp = async (req, res) => {
         })
         const savedToken = await token.save()
         if (savedToken.token) {
-            console.log(savedToken.token)
+            
         }
-        const url = "https://"+req.hostname+"/api/user/confirmemail?token="+savedToken.token
-        await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name },url)
+        console.log(encodeURIComponent(savedToken.token))
+        const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
+        await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
         res.json(data)
 
     }
@@ -100,9 +101,7 @@ const loginUser = async (req, res) => {
 }
 
 const confirmEmail = async (req, res) => {
-    //console.log(req.hostname + "        " + req.url)
-    //console.log(req.query.token)
-    const tokenId = req.query.token
+    const tokenId = decodeURIComponent(req.query.token)
     if (tokenId) {
         emailToken.findOne({ token: tokenId }, (err, token) => {
             if (err || !token) {
@@ -129,7 +128,7 @@ const confirmEmail = async (req, res) => {
     }
 }
 
-const resetPassword=(req,res)=>{
+const resetPassword = (req, res) => {
     //logic to write here
 }
 module.exports = {
