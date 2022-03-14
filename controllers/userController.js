@@ -55,7 +55,7 @@ const signUp = async (req, res) => {
         if (savedToken.token) {
             console.log(savedToken.token)
         }
-        const url = req.hostname+"/api/user/confirmemail?token="+savedToken.token
+        const url = "https://"+req.hostname+"/api/user/confirmemail?token="+savedToken.token
         await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name },url)
         res.json(data)
 
