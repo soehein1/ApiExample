@@ -2,7 +2,7 @@ const User = require("../models/userModel")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 const senEmail = require('../emails/emailConfirmation')
-const Token = require('../models/tokenModel')
+const emailToken = require('../models/emailTokenModel')
 require('dotenv').config()
 
 
@@ -31,21 +31,23 @@ const getUser = async (req, res) => {
 const signUp = async (req, res) => {
 
     // extract user information from request's body//
-    const { fullName, email, password, phone } = req.body
+    const { full_name, email, password, phone, role,address } = req.body
 
     const hashedPassword = await hashPassword(password)
     const user = new User({
-        fullName,
+        full_name,
+        role,
         phone,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        address
     });
     const isUserExists = await User.findOne({ email: user.email })
     if (isUserExists) {
         res.json({ message: 'User Already Exists' })
     } else {
         const data = await user.save()
-        const token = new Token({
+        const token = new emailToken({
             user: data._id,
             token: await bcrypt.genSalt(8)
         })
@@ -53,7 +55,8 @@ const signUp = async (req, res) => {
         if (savedToken.token) {
             console.log(savedToken.token)
         }
-        //await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name })
+        const url = req.hostname+"/api/user/confirmemail?token="+savedToken.token
+        await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name },url)
         res.json(data)
 
     }
@@ -71,7 +74,7 @@ const updateUser = (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!(email && password)) {
+        if (!(email || password)) {
             res.status(400).send('All input is required');
         }
         const user = await User.findOne({ email });
@@ -97,12 +100,11 @@ const loginUser = async (req, res) => {
 }
 
 const confirmEmail = async (req, res) => {
-    console.log(req.hostname + "        " + req.url)
+    //console.log(req.hostname + "        " + req.url)
     //console.log(req.query.token)
     const tokenId = req.query.token
     if (tokenId) {
-        Token.findOne({ token: tokenId }, (err, token) => {
-            //console.log(token)
+        emailToken.findOne({ token: tokenId }, (err, token) => {
             if (err || !token) {
                 res.status(404).json({ message: "No such thing exists :-)" })
             } else {
@@ -110,7 +112,7 @@ const confirmEmail = async (req, res) => {
                     if (error || !user) {
                         res.status(400).json({ message: "its too late bro" })
                     } else {
-                        await Token.findOneAndDelete({ token: tokenId })
+                        await emailToken.findOneAndDelete({ token: tokenId })
 
                         res.status(201).json({ message: "verified successfully" })
                     }
@@ -125,6 +127,10 @@ const confirmEmail = async (req, res) => {
         res.status(400).json({ message: "bad boy" })
 
     }
+}
+
+const resetPassword=(req,res)=>{
+    //logic to write here
 }
 module.exports = {
     getUser,
