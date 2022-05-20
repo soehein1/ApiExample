@@ -13,6 +13,7 @@ async function hashPassword(password) {
 }
 
 const getUser = async (req, res) => {
+    
     var user = {}
     jwt.verify(req.token, process.env.TOKEN_KEY, (err, authData) => {
         if (err) {
@@ -29,7 +30,7 @@ const getUser = async (req, res) => {
     }
 }
 const signUp = async (req, res) => {
-
+    console.log(req.file)
     // extract user information from request's body//
     const { full_name, email, password, phone, role, address } = req.body
 
@@ -55,9 +56,9 @@ const signUp = async (req, res) => {
         if (savedToken.token) {
             
         }
-        console.log(encodeURIComponent(savedToken.token))
-        const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
-        await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
+        //console.log(encodeURIComponent(savedToken.token))
+        //const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
+        //await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
         res.json(data)
 
     }
