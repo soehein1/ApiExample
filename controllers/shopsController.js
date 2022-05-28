@@ -3,9 +3,16 @@ const mongoose = require('mongoose')
 const url = require('url')
 const Shop = require("../models/shopModel")
 
-const getMyShop = (req, res) => {
+const getMyShop = async (req, res) => {
     try {
-        res.status(200).json({ message: "this is myshop route speaking:))" })
+        const user = req.user
+        if(user && user.role === 'shopkeeper'){
+            const shop = await Shop.findOne({shopkeeper:user.sub})
+            res.status(200).json(shop)
+        }else{
+            res.status(404).json({message:"access denied"})
+        }
+        
     } catch (error) {
         res.status(400).json({ message: "error in myshop route:((" })
 
@@ -31,23 +38,21 @@ const getShops = async (req, res) => {
 
 }
 
-/** name :{type:String, maxlenth:200,required:true},
-    shopkeeper:{type:mongoose.Types.ObjectId},
-    address:{},
-    phone_number:{},
-    email_address:{},
-    profile_picture:{},
-    banner:{} */
+
 const createShop = async (req, res) => {
     try {
-        const {name,shopkeeper,address,phone_number,email_address}=req.body
-        const shop = new Shop({name,shopkeeper,address,phone_number,email_address })
+        const user = req.user
+        const {name,address,phone_number,email_address}=req.body
+        const shop = new Shop({name,shopkeeper:user.sub,address,phone_number,email_address })
         await shop.save()
         res.status(201).json({ message: "created myshop" })
     } catch (error) {
+        console.log(error.message)
         res.status(200).json({ message: "error in myshop route" })
     }
 }
+
+
 const updateShop = (req, res) => {
     try {
         res.status(202).json({ message: "myshop successfully updated:))" })
