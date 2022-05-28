@@ -28,7 +28,7 @@ router.post('/register',
     signUp);
 
 router.post('/login', loginUser)
-router.put('/me', updateUser);
+router.put('/me',checkToken, updateUser);
 router.get('/confirmemail', confirmEmail)
 
 module.exports = router

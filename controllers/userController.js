@@ -13,20 +13,11 @@ async function hashPassword(password) {
 }
 
 const getUser = async (req, res) => {
-    
-    var user = {}
-    jwt.verify(req.token, process.env.TOKEN_KEY, (err, authData) => {
-        if (err) {
-            res.status(403).json({ message: "forbidden" })
-        }
-        else {
-            user = authData
-        }
-
-    })
-    user = await User.findOne({ email: user.email })
+    const user = await User.findOne({ email: req.user.email })
     if (user) {
-        res.json(user)
+        res.status(200).json({user:user})
+    }else{
+        res.status(400).json({user:{},message:"forbidden"})
     }
 }
 const signUp = async (req, res) => {
@@ -59,7 +50,7 @@ const signUp = async (req, res) => {
         //console.log(encodeURIComponent(savedToken.token))
         //const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
         //await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
-        res.json(data)
+        res.status(201).json(data)
 
     }
 
@@ -83,7 +74,7 @@ const loginUser = async (req, res) => {
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign(
                 {
-                    sub: user._id, email: user.email, status: user.status
+                    sub: user._id, email: user.email, status: user.status,role:"shopkeeper"
 
                 },
                 process.env.TOKEN_KEY,

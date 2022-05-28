@@ -1,22 +1,33 @@
 const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 
-const checkToken = (req, res, next) => {
-    console.log("in token now")
+
+const checkToken = async (req, res, next) => {
     const header = req.headers['authorization'];
-
-    if (typeof header !== 'undefined') {
+    if (header !== undefined) {
         const token = header.split(' ')[1];
-        if (token) {
-            req.token = token;
-            return next();
+        if (token !== undefined || token !== null) {
+            jwt.verify(token, process.env.TOKEN_KEY, (err, user) => {
+                
+                if (err) {
+                    res.status(400).json({ message: "login time out" })
+                }
+                else {
+                    req.user = user;
+                    next()
+                }
+
+            });
         }
-        else{
-            return res.status(400).json({message:"invalid token"})
+        else {
+            res.status(400).json({ message: "invalid token" })
         }
     } else {
-        //If header is undefined return Forbidden (403)
-        res.sendStatus(403).json({message:"access denied"})
+        //If header is undefined return Forbidden (401)
+        res.status(401).json({ message: "unauthorized" })
     }
 }
 module.exports = checkToken
+
+

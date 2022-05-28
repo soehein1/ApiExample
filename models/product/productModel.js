@@ -1,12 +1,13 @@
 const mongoose = require('mongoose')
 
 const productSchema = new mongoose.Schema({
-    name: String,
-    images:{type:Array},
-    shop:{type :mongoose.Types.ObjectId},
-    category:String,
-    price:String,
+    name: { type:String, required:true},
+    images:{type:Array },
+    shop:{type :mongoose.Types.ObjectId ,ref:'User'},
     type:String,
+    category:{type:String , required:true},
+    price:{type:String , required:true},
+    
     likes:{type:Number,default:0},
     reviews:{type:Number,default:0},
 

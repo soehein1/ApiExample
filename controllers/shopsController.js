@@ -30,6 +30,7 @@ const getShops = async (req, res) => {
     }
 
 }
+
 /** name :{type:String, maxlenth:200,required:true},
     shopkeeper:{type:mongoose.Types.ObjectId},
     address:{},

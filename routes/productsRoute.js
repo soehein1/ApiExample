@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router()
-const Product = require('../models/productModel')
-const  { getProducts,postProduct,deleteProduct}= require( '../controllers/productsController')
+const { getProducts, postProduct, deleteProduct, updateProduct } = require('../controllers/productsController')
+const checkToken = require('../middlewares/tokenValidation')
 
-
-router.get('/products' , getProducts);
-router.post('/product', postProduct);
-router.put('/products/:id', (req, res) => {  });
-router.delete('/products',deleteProduct)
+router.get('/products', getProducts);
+router.post('/product', checkToken, postProduct);
+router.put('/products',checkToken, updateProduct);
+router.delete('/products', deleteProduct)
 
 
 
