@@ -5,30 +5,19 @@ const checkPhone = require('../middlewares/phoneNumberVerification')
 const checkToken = require('../middlewares/tokenValidation')
 const isPasswordValid = require('../middlewares/passwordValidator')
 const router = express.Router()
-const path = require('path')
+const {storage,uploadProfilePicture} = require('../middlewares/storage')
 const multer = require("multer")
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname,"../upload/profile_pics/") )
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix =  '-' + Math.round(Math.random() * 1E9)
-        cb(null, file.fieldname + '-' + uniqueSuffix+file.originalname)
-    }
-})
-const upload = multer({ storage: storage })
+
 
 
 router.get('/me', checkToken, getUser);
 router.post('/register',
-    upload.single('avatar'),
-    checkEmail,
-    checkPhone,
+    uploadProfilePicture,
     isPasswordValid,
     signUp);
 
 router.post('/login', loginUser)
-router.put('/me',checkToken, updateUser);
+router.put('/me', checkToken, updateUser);
 router.get('/confirmemail', confirmEmail)
 
 module.exports = router

@@ -1,8 +1,11 @@
 const User = require("../models/userModel")
+const Image = require('../models/imageModel')
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 const senEmail = require('../emails/emailConfirmation')
 const emailToken = require('../models/emailTokenModel')
+const fs = require('fs')
+const path = require("path")
 require('dotenv').config()
 
 
@@ -15,37 +18,44 @@ async function hashPassword(password) {
 const getUser = async (req, res) => {
     const user = await User.findOne({ email: req.user.email })
     if (user) {
-        res.status(200).json({user:user})
-    }else{
-        res.status(400).json({user:{},message:"forbidden"})
+        res.status(200).json({ user: user })
+    } else {
+        res.status(400).json({ user: {}, message: "forbidden" })
     }
 }
 const signUp = async (req, res) => {
-    console.log(req.file)
     // extract user information from request's body//
     const { full_name, email, password, phone, role, address } = req.body
 
     const hashedPassword = await hashPassword(password)
     const user = new User({
         full_name,
+        profile_picture:process.env.PROFILE_PICTURE_URL+'profile_pics/'+req.file.filename,
         role,
         phone,
         email,
         password: hashedPassword,
         address
     });
+
     const isUserExists = await User.findOne({ email: user.email })
     if (isUserExists) {
+
+        if(req.file!==undefined){
+            console.log(req.file)
+            fs.unlinkSync(req.file.path)
+        }
         res.json({ message: 'User Already Exists' })
     } else {
         const data = await user.save()
+
         const token = new emailToken({
             user: data._id,
             token: await bcrypt.genSalt(8)
         })
         const savedToken = await token.save()
         if (savedToken.token) {
-            
+
         }
         //console.log(encodeURIComponent(savedToken.token))
         //const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
@@ -74,7 +84,7 @@ const loginUser = async (req, res) => {
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign(
                 {
-                    sub: user._id, email: user.email, status: user.status,role:"shopkeeper"
+                    sub: user._id, email: user.email, status: user.status, role: "shopkeeper"
 
                 },
                 process.env.TOKEN_KEY,
