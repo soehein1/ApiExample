@@ -1,19 +1,17 @@
-const User = require("../models/userModel")
-const Image = require('../models/imageModel')
+const User = require("../models/user/userModel")
+const Image = require('../models/media/imageModel')
 const bcrypt = require("bcrypt")
+const {createUser , userExists} = require('./user/createUser')
 const jwt = require('jsonwebtoken')
-const senEmail = require('../emails/emailConfirmation')
-const emailToken = require('../models/emailTokenModel')
+const log = require('../helpers/logRequest')
+const sendEmail = require('../foreignAPIs/emailConfirmation')
+const emailToken = require('../models/user/emailTokenModel')
 const fs = require('fs')
 const path = require("path")
 require('dotenv').config()
 
 
-async function hashPassword(password) {
-    const salt = await bcrypt.genSalt(11);
-    const hash = await bcrypt.hash(password, salt)
-    return hash;
-}
+
 
 const getUser = async (req, res) => {
     const user = await User.findOne({ email: req.user.email })
@@ -24,25 +22,13 @@ const getUser = async (req, res) => {
     }
 }
 const signUp = async (req, res) => {
+    log(req)
     // extract user information from request's body//
-    const { full_name, email, password, phone, role, address } = req.body
+    const newUser = createUser(req)
+    
+    if (await userExists(newUser.email)) {
 
-    const hashedPassword = await hashPassword(password)
-    const user = new User({
-        full_name,
-        profile_picture:process.env.PROFILE_PICTURE_URL+'profile_pics/'+req.file.filename,
-        role,
-        phone,
-        email,
-        password: hashedPassword,
-        address
-    });
-
-    const isUserExists = await User.findOne({ email: user.email })
-    if (isUserExists) {
-
-        if(req.file!==undefined){
-            console.log(req.file)
+        if (req.file !== undefined) {
             fs.unlinkSync(req.file.path)
         }
         res.json({ message: 'User Already Exists' })
@@ -59,7 +45,7 @@ const signUp = async (req, res) => {
         }
         //console.log(encodeURIComponent(savedToken.token))
         //const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
-        //await senEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
+        //await sendEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
         res.status(201).json(data)
 
     }
@@ -94,7 +80,7 @@ const loginUser = async (req, res) => {
             );
             res.status(201).json({ token })
         } else {
-            res.status(400).json({ message: "enter correct email and password" })
+            res.status(400).json({ message: "incorrect email and password" })
         }
     } catch (err) {
         console.log(err)

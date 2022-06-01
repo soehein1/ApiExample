@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const url = require('url')
-const Shop = require("../models/shopModel")
+const Log = require('../helpers/logRequest')
+const Shop = require("../models/shop/shopModel")
 
 
 
@@ -23,13 +24,15 @@ const getMyShop = async (req, res) => {
 }
 
 const getShops = async (req, res) => {
+
     try {
+        Log(req)
         const address = url.parse(req.protocol + "://" + req.hostname + req.originalUrl, true)
         const query = address.query
         if (query.id !== undefined && query.id !== null && query !== undefined && mongoose.Types.ObjectId.isValid(query.id)) {
             const shop = await Shop.findOne({ _id: query.id })
             res.status(200).json(shop)
-        } else {
+        } else{
             const shops = await Shop.find()
             res.status(200).json(shops)
         }

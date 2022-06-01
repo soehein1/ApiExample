@@ -1,19 +1,18 @@
 const express = require('express');
 const { loginUser, getUser, updateUser, signUp, confirmEmail } = require('../controllers/userController')
-const checkEmail = require('../middlewares/emailVerification')
-const checkPhone = require('../middlewares/phoneNumberVerification')
+const checkEmail = require('../foreignAPIs/middlewares/emailVerification')
+const checkPhone = require('../foreignAPIs/middlewares/phoneNumberVerification')
 const checkToken = require('../middlewares/tokenValidation')
 const isPasswordValid = require('../middlewares/passwordValidator')
 const router = express.Router()
-const {storage,uploadProfilePicture} = require('../middlewares/storage')
-const multer = require("multer")
-
-
+const {  uploadProfilePicture } = require('../middlewares/storage')
 
 router.get('/me', checkToken, getUser);
 router.post('/register',
+    checkToken,
     uploadProfilePicture,
     isPasswordValid,
+    
     signUp);
 
 router.post('/login', loginUser)
