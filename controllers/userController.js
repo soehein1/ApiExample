@@ -1,7 +1,8 @@
-const User = require("../models/user/userModel")
+const {User} = require("../models/user/userModel")
 const Image = require('../models/media/imageModel')
 const bcrypt = require("bcrypt")
-const {createUser , userExists} = require('./user/createUser')
+const { createUser, userExists } = require('./user/createUser')
+const { createToken, isTokenExists } = require('../controllers/user/createToken')
 const jwt = require('jsonwebtoken')
 const log = require('../helpers/logRequest')
 const sendEmail = require('../foreignAPIs/emailConfirmation')
@@ -14,40 +15,57 @@ require('dotenv').config()
 
 
 const getUser = async (req, res) => {
-    const user = await User.findOne({ email: req.user.email })
-    if (user) {
-        res.status(200).json({ user: user })
-    } else {
-        res.status(400).json({ user: {}, message: "forbidden" })
+    try {
+        const user = await User.findOne({ email: req.user.email })
+        if (user) {
+            res.status(200).json({ user: user })
+        } else {
+            res.status(400).json({ user: {}, message: "forbidden" })
+        }
+    } catch (error) {
+        console.log(error.message)
+        res.status(400).json({message:"something went wrong"})
     }
+
 }
 const signUp = async (req, res) => {
-    log(req)
-    // extract user information from request's body//
-    const newUser = createUser(req)
-    
-    if (await userExists(newUser.email)) {
+    try {
+        log(req)
+        // extract user information from request's body//
+        const newUser = createUser(req)
 
-        if (req.file !== undefined) {
+        if (await userExists(newUser.email)) {
+
+            if (req.file !== undefined) {
+                fs.unlinkSync(req.file.path)
+            }
+            res.json({ message: 'User Already Exists' })
+        } else {
+            const data = await newUser.save()
+            if (await isTokenExists(data)) {
+                //<<<<<<<<<<<<<<<<<<<<..LOGIC GOES HERE..>>>>>>>>>>>>>>>>>
+            }
+            const token = createToken(data)
+            const savedToken = await token.save()
+            if (savedToken.token) {
+                console.log(encodeURIComponent(savedToken.token))
+                const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
+                await sendEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
+                res.status(201).json(data)
+            }
+            else {
+                res.status(400).json({ message: "something went wrong" })
+            }
+
+
+        }
+
+    } catch (error) {
+        if (req.file) {
             fs.unlinkSync(req.file.path)
         }
-        res.json({ message: 'User Already Exists' })
-    } else {
-        const data = await user.save()
-
-        const token = new emailToken({
-            user: data._id,
-            token: await bcrypt.genSalt(8)
-        })
-        const savedToken = await token.save()
-        if (savedToken.token) {
-
-        }
-        //console.log(encodeURIComponent(savedToken.token))
-        //const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
-        //await sendEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
-        res.status(201).json(data)
-
+        console.log(error.message)
+        res.status(400).json({ message: "something went wrong" })
     }
 
 
@@ -60,6 +78,8 @@ const signUp = async (req, res) => {
 const updateUser = (req, res) => {
     res.send('user updated')
 }
+
+
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;

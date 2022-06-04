@@ -9,9 +9,9 @@ const {  uploadProfilePicture } = require('../middlewares/storage')
 
 router.get('/me', checkToken, getUser);
 router.post('/register',
-    checkToken,
     uploadProfilePicture,
     isPasswordValid,
+    checkEmail,
     
     signUp);
 
