@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 router.get('/', (req, res) => {
+    
     res.send('all orders')
 });
 router.get('/:id', (req, res) => {

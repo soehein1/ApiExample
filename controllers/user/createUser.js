@@ -1,16 +1,17 @@
+const res = require('express/lib/response')
 const { User, Address } = require('../../models/user/userModel')
 const hashPassword = require('./hashPassword')
 require('dotenv').config()
 
 
-const createUser = (req) => {
+const createUser = (req,res) => {
     const { full_name, phone, role, email, password } = req.body
-    const { state, town, home_number } = req.body
-    const address = new Address({ state, town, village_or_ward: "", home_number })
-    if (!(full_name || email || role || password)) {
-        return {}
-    }
+    const { state, town, home_number, village_or_ward } = req.body
 
+    if (!(full_name && email && role && password && state && town && village_or_ward)) {
+        return null
+    }
+    const address = new Address({ state, town, home_number, village_or_ward })
     if (role === 'shopkeeper' || role === 'customer') {
         const user = new User({
             full_name,

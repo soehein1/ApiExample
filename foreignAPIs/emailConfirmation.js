@@ -2,7 +2,7 @@ const sibsdk = require('sib-api-v3-sdk')
 require('dotenv').config()
 
 
-const sendEmail =async (from, to,url) => {
+const sendEmail =async (from, to,data) => {
     let defaultClient = sibsdk.ApiClient.instance;
     let apiKey = defaultClient.authentications['api-key']
     apiKey.apiKey = process.env.SEND_IN_BLUE_API_KEY
@@ -10,7 +10,7 @@ const sendEmail =async (from, to,url) => {
     var sendSmtpEmail = new sibsdk.SendSmtpEmail();
     sendSmtpEmail.to = [{email:to.email}];
     sendSmtpEmail.sender = {email:from.email,name:from.name};
-    sendSmtpEmail.textContent= url;
+    sendSmtpEmail.textContent= data;
     sendSmtpEmail.subject = "Confirm Password";
     //let sendTemplateEmail = new sibsdk.SendTemplateEmail();
     //sendSmtpEmail.subject = "Confirm Email Example";

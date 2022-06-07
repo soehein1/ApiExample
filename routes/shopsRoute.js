@@ -1,6 +1,6 @@
 const { route } = require('./usersRoute')
 const { getShops, getMyShop, createShop, updateShop } = require('../controllers/shopsController')
-const checkToken = require('../middlewares/tokenValidation')
+const checkToken = require('../middlewares/auth/tokenValidation')
 const router = require('express').Router()
 
 

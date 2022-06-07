@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const resetPasswordTokenSchema= new mongoose.Schema({
-    user:{type :mongoose.Types.ObjectId, ref :'User',required:true},
+    user:{type :String, required:true},
     token:{type:String,required:true},
+    createdAt:{type:Date,expires:300,default:Date.now}
 
-},{timestamps:true})
-module.exports=mongoose.model('resetPasswordToken',resetPasswordTokenSchema)
+})
+module.exports=mongoose.model('ResetPasswordToken',resetPasswordTokenSchema)

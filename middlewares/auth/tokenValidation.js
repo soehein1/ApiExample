@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 
-
 const checkToken = async (req, res, next) => {
     const header = req.headers['authorization'];
     if (header !== undefined) {
@@ -28,6 +27,8 @@ const checkToken = async (req, res, next) => {
         res.status(401).json({ message: "unauthorized" })
     }
 }
+
+
 module.exports = checkToken
 
 
