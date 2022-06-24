@@ -30,7 +30,7 @@ const getUser = async (req, res) => {
 }
 const signUp = async (req, res) => {
     try {
-        log(req)
+        console.log('in Signup function')
         const newUser = createUser(req)
         if (!newUser) {
             if (req.file) {
