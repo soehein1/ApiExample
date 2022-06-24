@@ -17,6 +17,6 @@ router.post('/register',
 router.post('/login', loginUser)
 router.put('/me',  updateUser);
 router.get('/confirmemail', confirmEmail)
-router.post('/reset_pd',forgotPassword)
+router.post('/forgot_pd',forgotPassword)
 router.put('/reset_pd',resetPassword)
 module.exports = router
