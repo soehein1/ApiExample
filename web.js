@@ -23,7 +23,6 @@ app.use('/api/shops', shopsRoute)
 /////serving static files
 app.use('/api/images', express.static('./upload'))
 
-
 app.listen(process.env.PORT, () => {
     connectDB()
     console.log('server runnnning.....')

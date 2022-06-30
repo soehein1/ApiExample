@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt")
 const { createUser, userExists } = require('./user/createUser')
 const { createToken, isTokenExists } = require('../controllers/user/createToken')
 const jwt = require('jsonwebtoken')
-const log = require('../helpers/logRequest')
+
 const sendEmail = require('../foreignAPIs/emailConfirmation')
 const emailToken = require('../models/user/emailTokenModel')
 const fs = require('fs')
