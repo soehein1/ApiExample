@@ -83,7 +83,15 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ email });
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = generateAccessToken(user)
-            return res.status(200).json({ token })
+            return res.status(200).json({ 
+                token,
+                name:user.full_name,
+                profile_picture:user.profile_picture,
+                email:user.email,
+                address:user.address,
+                phone:user.phone,
+                role:user.role
+             })
         } else {
             return res.status(400).json({ message: "incorrect email and password" })
         }
