@@ -16,7 +16,7 @@ const createUser = (req,res) => {
         const user = new User({
             full_name,
             role,
-            profile_picture: req.file ? process.env.PROFILE_PICTURE_URL + req.file.filename : "",
+            profile_picture: "",
             phone,
             email,
             password: hashPassword(password),

@@ -33,15 +33,9 @@ const signUp = async (req, res) => {
         console.log('in Signup function')
         const newUser = createUser(req)
         if (!newUser) {
-            if (req.file) {
-                fs.unlinkSync(req.file.path)
-            }
             return res.status(400).json({ message: "user information incomplete" })
         }
         if (await userExists(newUser.email)) {
-            if (req.file !== undefined) {
-                fs.unlinkSync(req.file.path)
-            }
             res.json({ message: 'User Already Exists' })
         } else {
             const data = await newUser.save()
@@ -57,9 +51,7 @@ const signUp = async (req, res) => {
             }
         }
     } catch (error) {
-        if (req.file) {
-            fs.unlinkSync(req.file.path)
-        }
+        
         console.log(error.message)
         res.status(400).json({ message: "something went wrong" })
     }
