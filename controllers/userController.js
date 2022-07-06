@@ -19,7 +19,7 @@ const getUser = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.user.email })
         if (user) {
-            res.status(200).json({ user:{name:user.name,email:user.email,role:user.role,phone:user.phone,profile_picture:user.profile_picture} })
+            res.status(200).json({ user:{name:user.full_name,email:user.email,role:user.role,phone:user.phone,profile_picture:user.profile_picture} })
         } else {
             res.status(400).json({ user: {}, message: "forbidden" })
         }
