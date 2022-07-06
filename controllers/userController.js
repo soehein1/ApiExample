@@ -19,7 +19,7 @@ const getUser = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.user.email })
         if (user) {
-            res.status(200).json({ user: user })
+            res.status(200).json({ user:{name:user.name,email:user.email,role:user.role,phone:user.phone,profile_picture:user.profile_picture} })
         } else {
             res.status(400).json({ user: {}, message: "forbidden" })
         }
@@ -36,15 +36,15 @@ const signUp = async (req, res) => {
             return res.status(400).json({ message: "user information incomplete" })
         }
         if (await userExists(newUser.email)) {
-            res.json({ message: 'User Already Exists' })
+            res.status(409).json({ message: 'Already Exists' })
         } else {
             const data = await newUser.save()
             const token = createToken(data)
             const savedToken = await token.save()
             if (savedToken.token) {
-                const url = "https://" + req.hostname + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
+                const url = "https://" + process.env.HOST_NAME + "/api/user/confirmemail?token=" + encodeURIComponent(savedToken.token)
                 await sendEmail({ "email": 'sohilerashid4@gmail.com', "name": "Sohile Yor Dad" }, { "email": data.email, "name": data.name }, url)
-                res.status(201).json(data)
+                res.status(201).json({"user":{name:data.full_name,email:data.email,phone:data.phone,address:data.address,role:data.role}})
             }
             else {
                 res.status(400).json({ message: "something went wrong" })
