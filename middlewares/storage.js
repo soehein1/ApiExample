@@ -9,9 +9,6 @@ const storage = multer.diskStorage({
         } else {
             cb(null, path.join(__dirname, "../upload/uploads"))
         }
-
-
-
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = '-' + Math.round(Math.random() * 1E9)

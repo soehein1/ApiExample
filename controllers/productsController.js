@@ -32,21 +32,26 @@ const getCategories = (req, res) => {
     //return categories
     res.status(200).json({ message: "get Categories route" })
 }
-
+const createProduct = (req)=>{
+    const {name, price , type,category } = req.body
+    const product = new Product({name,price,type , category,shop:req.user.sub})
+    return product;
+}
 const postProduct = async (req, res) => {
     //verification logic here
     try {
-        if (req.user.role !== 'shopkeeper' || req.user.status !== "verified") {
-            res.status(400).json({ message: 'access denied' })
+        const user = req.user
+        if (!user || user.role !== 'shopkeeper' || user.status !== "verified") {
+            return res.status(400).json({ message: 'access denied' })
         } else {
             //logic for extracting information from request
-            const { name, price, type, category } = req.body
-            const product = new Product({ name, price, type, category, shop: req.user.sub })
+            const product = createProduct(req)
+            
             await product.save()
             res.status(200).json(product)
         }
     } catch (error) {
-        res.status(400).json({ error: "something went wrong" })
+        res.status(400).json({ message: "something went wrong" })
     }
 
 

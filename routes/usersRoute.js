@@ -5,14 +5,13 @@ const checkPhone = require('../foreignAPIs/middlewares/phoneNumberVerification')
 const checkToken = require('../middlewares/auth/tokenValidation')
 const isPasswordValid = require('../middlewares/passwordValidator')
 const router = express.Router()
-const { uploadProfilePicture } = require('../middlewares/storage')
 
 router.get('/me', checkToken, getUser);
 router.post('/register',
     isPasswordValid,
     checkEmail,
     signUp);
-
+router.put('/update_user', updateUser)
 router.post('/login', loginUser)
 router.put('/me',  updateUser);
 router.get('/confirmemail', confirmEmail)
